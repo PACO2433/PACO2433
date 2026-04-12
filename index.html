@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>ALDREX TOTAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json"> <meta name="theme-color" content="#1e3a8a">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:#0f172a;
+color:#e2e8f0;
+}
+
+/* LOGIN */
+#loginBox{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:linear-gradient(135deg,#212984,#0f172a);
+}
+
+.card{
+background:#1e293b;
+padding:30px;
+border-radius:12px;
+width:320px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* INPUTS */
+input,select{
+width:100%;
+padding:10px;
+margin:6px 0;
+border-radius:8px;
+border:none;
+background:#334155;
+color:white;
+}
+
+/* BOTONES */
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#3b82f6;
+color:white;
+transition:0.3s;
+}
+
+button:hover{
+background:#2563eb;
+}
+
+/* APP */
+#app{
+display:none;
+}
+
+/* HEADER / NAV */
+nav{
+display:flex;
+gap:10px;
+padding:12px;
+background:#1e293b;
+border-bottom:1px solid #334155;
+flex-wrap:wrap;
+}
+
+nav button{
+background:#334155;
+}
+
+nav button:hover{
+background:#475569;
+}
+
+/* SECCIONES */
+.section{
+display:none;
+padding:20px;
+}
+
+.active{
+display:block;
+}
+
+/* TITULOS */
+h2{
+margin-bottom:15px;
+color:#60a5fa;
+}
+
+/* TABLAS */
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+background:#1e293b;
+border-radius:10px;
+overflow:hidden;
+}
+
+th{
+background:#2563eb;
+padding:12px;
+text-align:left;
+}
+
+td{
+padding:10px;
+border-bottom:1px solid #334155;
+}
+
+tr:hover{
+background:#334155;
+}
+
+/* LISTA USUARIOS */
+ul{
+list-style:none;
+padding:0;
+}
+
+li{
+background:#1e293b;
+margin:5px 0;
+padding:10px;
+border-radius:8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+/* BOTONES ACCION */
+td button{
+margin-right:5px;
+padding:6px 10px;
+font-size:12px;
+}
+/* 📱 RESPONSIVE */
+@media (max-width: 768px){
+
+/* NAV */
+nav{
+flex-direction:column;
+align-items:stretch;
+}
+
+nav button{
+width:100%;
+margin:3px 0;
+}
+
+/* INPUTS */
+input,select{
+font-size:14px;
+}
+
+/* TABLAS → SCROLL */
+table{
+display:block;
+overflow-x:auto;
+white-space:nowrap;
+}
+
+/* BOTONES */
+button{
+width:100%;
+}
+
+/* TITULOS */
+h2{
+font-size:18px;
+}
+
+/* SECCIONES */
+.section{
+padding:10px;
+}
+@media (max-width:768px){
+
+/* TARJETAS EN LUGAR DE TABLAS */
+table, thead{
+display:none;
+}
+
+tbody tr{
+display:block;
+background:#1e293b;
+margin-bottom:10px;
+padding:10px;
+border-radius:10px;
+}
+
+/* CELDAS COMO BLOQUES */
+td{
+display:block;
+border:none;
+padding:5px 0;
+}
+
+td:before{
+font-weight:bold;
+display:block;
+color:#60a5fa;
+}
+
+}
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginBox">
+<div class="card">
+<h2>ALDREX</h2>
+<input id="user" placeholder="Usuario">
+<input id="pass" type="password" placeholder="Contraseña">
+<button onclick="login()">Entrar</button>
+</div>
+</div>
+
+<div id="app">
+
+<nav>
+<h3>ALDREX</h3>
+<button id="navDashboard" onclick="show('dashboard')">📊 Dashboard</button>
+<button id="navProyectos" onclick="show('proyectos')">🏗 Proyectos</button>
+<button id="navSolicitudes" onclick="show('solicitudes')">📩 Solicitudes</button>
+<button id="navUsuarios" onclick="show('usuarios')">👤 Usuarios</button>
+<button id="navConfig" onclick="show('config')">⚙ Config</button>
+<button onclick="logout()">Salir</button>
+</nav>
+
+<div id="dashboard" class="section active">
+<h2>Dashboard</h2>
+<canvas id="grafica"></canvas>
+</div>
+
+<div id="proyectos" class="section">
+<h2>Proyectos</h2>
+
+<input id="nombreProyecto" placeholder="Nombre">
+<input id="clienteProyecto" placeholder="Cliente">
+<input id="ubicacionProyecto" placeholder="Ubicación">
+<input id="presupuesto" type="number" placeholder="Presupuesto">
+<input id="avanceProyecto" type="number" placeholder="Avance">
+
+<select id="estadoProyecto">
+<option>Planeación</option>
+<option>En proceso</option>
+<option>Finalizado</option>
+</select>
+
+<button onclick="guardarProyecto()">Guardar</button>
+
+<table>
+<thead>
+<tr>
+<th>Nombre</th>
+<th>Cliente</th>
+<th>Ubicación</th>
+<th>Presupuesto</th>
+<th>Estado</th>
+<th>Avance</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody id="tablaProyectos"></tbody>
+</table>
+</div>
+
+<div id="solicitudes" class="section">
+<h2>Solicitudes</h2>
+
+<input id="tipoSolicitud" placeholder="Tipo">
+<input id="proyectoSolicitud" placeholder="Proyecto">
+<input id="detalleSolicitud" placeholder="Detalle">
+
+<button onclick="crearSolicitud()">Enviar</button>
+
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Proyecto</th>
+<th>Detalle</th>
+<th>Estado</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody id="tablaSolicitudes"></tbody>
+</table>
+</div>
+
+<div id="usuarios" class="section">
+<h2>Usuarios</h2>
+
+<input id="nombreCompleto" placeholder="Nombre">
+<input id="nuevoUser" placeholder="Usuario">
+<input id="nuevoPass" placeholder="Contraseña">
+
+<select id="rolUser">
+<option value="admin">admin</option>
+<option value="supervisor">supervisor</option>
+<option value="empleado">empleado</option>
+</select>
+
+<input id="area" placeholder="Área">
+
+<button onclick="guardarUsuario()">Guardar Usuario</button>
+
+<ul id="listaUsuarios"></ul>
+</div>
+
+<div id="config" class="section">
+<h2>Configuración</h2>
+<button onclick="exportarPDF()">Exportar PDF</button>
+</div>
+
+</div>
+
+<script>
+
+let usuarioActual=null;
+let chart=null;
+let editIndex=null;
+let editUserIndex=null;
+
+let db=JSON.parse(localStorage.getItem("aldrexDB"))||{
+usuarios:[{nombre:"Admin",user:"admin",pass:btoa("admin123"),rol:"admin",area:"General"}],
+proyectos:[],
+solicitudes:[]
+};
+
+function save(){localStorage.setItem("aldrexDB",JSON.stringify(db));}
+
+/* LOGIN */
+function login(){
+let u=user.value.trim();
+let p=btoa(pass.value.trim());
+let ok=db.usuarios.find(x=>x.user===u && x.pass===p);
+
+if(ok){
+usuarioActual=ok;
+loginBox.style.display="none";
+app.style.display="block";
+render();
+aplicarPermisos();
+}else alert("Error en credenciales");
+}
+
+function logout(){location.reload();}
+
+/* PERMISOS */
+function aplicarPermisos(){
+
+if(usuarioActual.rol==="admin") return;
+
+if(usuarioActual.rol==="supervisor"){
+navUsuarios.style.display="none";
+}
+
+if(usuarioActual.rol==="empleado"){
+navDashboard.style.display="none";
+navProyectos.style.display="none";
+navUsuarios.style.display="none";
+navConfig.style.display="none";
+}
+}
+
+/* NAV */
+function show(id){
+
+if(usuarioActual.rol==="empleado" && id!=="solicitudes"){
+alert("No tienes acceso");
+return;
+}
+
+if(usuarioActual.rol==="supervisor" && id==="usuarios"){
+alert("No autorizado");
+return;
+}
+
+document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* PROYECTOS */
+function guardarProyecto(){
+if(usuarioActual.rol==="empleado"){alert("No autorizado");return;}
+
+let data={
+nombre:nombreProyecto.value,
+cliente:clienteProyecto.value,
+ubicacion:ubicacionProyecto.value,
+presupuesto:Number(presupuesto.value||0),
+estado:estadoProyecto.value,
+avance:Number(avanceProyecto.value||0)
+};
+
+if(editIndex===null){
+db.proyectos.push(data);
+}else{
+db.proyectos[editIndex]=data;
+editIndex=null;
+}
+
+save();
+limpiarProyecto();
+render();
+}
+
+function editarProyecto(i){
+let p=db.proyectos[i];
+nombreProyecto.value=p.nombre;
+clienteProyecto.value=p.cliente;
+ubicacionProyecto.value=p.ubicacion;
+presupuesto.value=p.presupuesto;
+avanceProyecto.value=p.avance;
+estadoProyecto.value=p.estado;
+editIndex=i;
+}
+
+function eliminarProyecto(i){
+if(usuarioActual.rol!=="admin"){alert("Solo admin");return;}
+db.proyectos.splice(i,1);
+save();
+render();
+}
+
+function limpiarProyecto(){
+nombreProyecto.value="";
+clienteProyecto.value="";
+ubicacionProyecto.value="";
+presupuesto.value="";
+avanceProyecto.value="";
+}
+
+/* SOLICITUDES */
+function crearSolicitud(){
+db.solicitudes.push({
+tipo:tipoSolicitud.value,
+proyecto:proyectoSolicitud.value,
+detalle:detalleSolicitud.value,
+estado:"Pendiente"
+});
+save();
+render();
+}
+
+function aprobar(i){
+db.solicitudes[i].estado="Aprobado";
+save();
+render();
+}
+
+function eliminarSolicitud(i){
+if(usuarioActual.rol==="empleado"){alert("No autorizado");return;}
+db.solicitudes.splice(i,1);
+save();
+render();
+}
+
+/* USUARIOS */
+function guardarUsuario(){
+if(usuarioActual.rol!=="admin"){alert("Solo admin");return;}
+
+let userVal=nuevoUser.value.trim();
+
+let existe=db.usuarios.find((u,i)=>u.user===userVal && i!==editUserIndex);
+if(existe){alert("Usuario duplicado");return;}
+
+let data={
+nombre:nombreCompleto.value,
+user:userVal,
+pass:btoa(nuevoPass.value||"123"),
+rol:rolUser.value,
+area:area.value
+};
+
+if(editUserIndex===null){
+db.usuarios.push(data);
+}else{
+db.usuarios[editUserIndex]=data;
+editUserIndex=null;
+}
+
+save();
+limpiarUsuario();
+render();
+}
+
+function editarUsuario(i){
+let u=db.usuarios[i];
+nombreCompleto.value=u.nombre;
+nuevoUser.value=u.user;
+nuevoPass.value="";
+rolUser.value=u.rol;
+area.value=u.area;
+editUserIndex=i;
+}
+
+function eliminarUsuario(i){
+if(usuarioActual.rol!=="admin"){alert("Solo admin");return;}
+if(db.usuarios[i].user===usuarioActual.user){
+alert("No puedes eliminarte");
+return;
+}
+db.usuarios.splice(i,1);
+save();
+render();
+}
+
+function limpiarUsuario(){
+nombreCompleto.value="";
+nuevoUser.value="";
+nuevoPass.value="";
+area.value="";
+editUserIndex=null;
+}
+
+/* RENDER */
+function render(){
+
+tablaProyectos.innerHTML=db.proyectos.map((p,i)=>`
+<tr>
+<td>${p.nombre}</td>
+<td>${p.cliente}</td>
+<td>${p.ubicacion}</td>
+<td>${p.presupuesto}</td>
+<td>${p.estado}</td>
+<td>${p.avance}%</td>
+<td>
+<button onclick="editarProyecto(${i})">Editar</button>
+${usuarioActual.rol==="admin"?`<button onclick="eliminarProyecto(${i})">Eliminar</button>`:""}
+</td>
+</tr>`).join("");
+
+tablaSolicitudes.innerHTML=db.solicitudes.map((s,i)=>`
+<tr>
+<td>${s.tipo}</td>
+<td>${s.proyecto}</td>
+<td>${s.detalle}</td>
+<td>${s.estado}</td>
+<td>
+<button onclick="aprobar(${i})">OK</button>
+<button onclick="eliminarSolicitud(${i})">Eliminar</button>
+</td>
+</tr>`).join("");
+
+listaUsuarios.innerHTML=db.usuarios.map((u,i)=>`
+<li>
+${u.nombre} - ${u.rol}
+<button onclick="editarUsuario(${i})">Editar</button>
+<button onclick="eliminarUsuario(${i})">Eliminar</button>
+</li>`).join("");
+
+if(chart) chart.destroy();
+
+if(db.proyectos.length>0){
+chart=new Chart(grafica,{
+type:"bar",
+data:{
+labels:db.proyectos.map(p=>p.nombre),
+datasets:[{
+label:"Avance",
+data:db.proyectos.map(p=>p.avance)
+}]
+}
+});
+}
+
+}
+
+/* PDF */
+
+async function exportarPDF(){
+
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+let y = 10;
+
+/* TITULO */
+doc.setFontSize(18);
+doc.text("REPORTE DE OBRA - ALDREX", 10, y);
+y += 10;
+
+/* FECHA */
+doc.setFontSize(10);
+doc.text("Fecha: " + new Date().toLocaleDateString(), 10, y);
+y += 10;
+
+/* SEPARADOR */
+doc.line(10, y, 200, y);
+y += 8;
+
+/* SECCIÓN PROYECTOS */
+doc.setFontSize(14);
+doc.text("REGISTRO DE PROYECTOS", 10, y);
+y += 8;
+
+doc.setFontSize(10);
+
+db.proyectos.forEach((p, i)=>{
+
+doc.text(`Proyecto: ${p.nombre}`, 10, y); y+=6;
+doc.text(`Cliente: ${p.cliente}`, 10, y); y+=6;
+doc.text(`Ubicación: ${p.ubicacion}`, 10, y); y+=6;
+doc.text(`Estado: ${p.estado}`, 10, y); y+=6;
+doc.text(`Presupuesto: $${p.presupuesto}`, 10, y); y+=6;
+
+y+=3;
+
+/* TABLA DE AVANCE */
+doc.setFontSize(12);
+doc.text("Tabla de Avance", 10, y);
+y+=6;
+
+doc.setFontSize(10);
+
+/* ENCABEZADO */
+doc.setFillColor(37,99,235);
+doc.rect(10,y,180,8,'F');
+doc.setTextColor(255,255,255);
+doc.text("Proyecto",12,y+5);
+doc.text("Avance %",120,y+5);
+
+y+=8;
+
+/* DATOS */
+doc.setTextColor(0,0,0);
+
+doc.rect(10,y,180,8);
+doc.text(p.nombre,12,y+5);
+doc.text(p.avance+"%",120,y+5);
+
+y+=12;
+
+/* SEPARADOR ENTRE PROYECTOS */
+doc.setDrawColor(200);
+doc.line(10,y,200,y);
+y+=6;
+
+/* SALTO DE PAGINA AUTOMATICO */
+if(y > 270){
+doc.addPage();
+y = 10;
+}
+
+});
+
+/* SECCIÓN SOLICITUDES */
+doc.addPage();
+y=10;
+
+doc.setFontSize(14);
+doc.text("SOLICITUDES",10,y);
+y+=10;
+
+doc.setFontSize(10);
+
+db.solicitudes.forEach((s,i)=>{
+
+doc.text(`Tipo: ${s.tipo}`,10,y); y+=5;
+doc.text(`Proyecto: ${s.proyecto}`,10,y); y+=5;
+doc.text(`Detalle: ${s.detalle}`,10,y); y+=5;
+doc.text(`Estado: ${s.estado}`,10,y); y+=7;
+
+if(y > 270){
+doc.addPage();
+y=10;
+}
+
+});
+
+/* GUARDAR */
+doc.save("REPORTE_ALDREX.pdf");
+
+}
+
+</script>
+
+</body>
+</html>
+
