@@ -5,16 +5,29 @@
 <title>ALDREX TOTAL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json"> <meta name="theme-color" content="#1e3a8a">
-
+<div class="bg-animacion"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
+/* VARIABLES */
+:root{
+--bg:#0f172a;
+--card:#1e293b;
+--card-soft:#273449;
+--primary:#3b82f6;
+--primary-hover:#2563eb;
+--text:#e2e8f0;
+--muted:#94a3b8;
+--border:#334155;
+}
+
+/* GLOBAL */
 body{
 margin:0;
 font-family:'Segoe UI',sans-serif;
-background:#0f172a;
-color:#e2e8f0;
+background:linear-gradient(135deg,#0f172a,#020617);
+color:var(--text);
 }
 
 /* LOGIN */
@@ -23,70 +36,105 @@ display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
-background:linear-gradient(135deg,#212984,#0f172a);
+background:linear-gradient(135deg,#1e3a8a,#0f172a);
 }
 
+/* TARJETAS */
 .card{
-background:#1e293b;
+background:rgba(30,41,59,0.85);
+backdrop-filter:blur(10px);
 padding:30px;
-border-radius:12px;
-width:320px;
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
+border-radius:16px;
+width:340px;
+box-shadow:0 15px 40px rgba(0,0,0,0.5);
+border:1px solid rgba(255,255,255,0.05);
+animation:fadeIn 0.6s ease;
 }
 
 /* INPUTS */
 input,select{
 width:100%;
-padding:10px;
-margin:6px 0;
-border-radius:8px;
-border:none;
-background:#334155;
-color:white;
-}
-
-/* BOTONES */
-button{
-padding:10px 15px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-background:#3b82f6;
+padding:12px;
+margin:8px 0;
+border-radius:10px;
+border:1px solid var(--border);
+background:var(--card-soft);
 color:white;
 transition:0.3s;
 }
 
+input:focus,select:focus{
+outline:none;
+border-color:var(--primary);
+box-shadow:0 0 10px rgba(59,130,246,0.5);
+}
+
+/* BOTONES */
+button{
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+background:linear-gradient(135deg,var(--primary),#60a5fa);
+color:white;
+font-weight:bold;
+transition:0.3s;
+box-shadow:0 5px 15px rgba(59,130,246,0.3);
+}
+
 button:hover{
-background:#2563eb;
+background:linear-gradient(135deg,var(--primary-hover),#3b82f6);
+transform:translateY(-2px);
 }
 
 /* APP */
 #app{
 display:none;
+margin-left:220px;
 }
 
-/* HEADER / NAV */
+/* SIDEBAR */
 nav{
+position:fixed;
+top:0;
+left:0;
+width:220px;
+height:100vh;
 display:flex;
+flex-direction:column;
 gap:10px;
-padding:12px;
-background:#1e293b;
-border-bottom:1px solid #334155;
-flex-wrap:wrap;
+padding:20px 10px;
+background:rgba(30,41,59,0.95);
+backdrop-filter:blur(10px);
+border-right:1px solid var(--border);
+z-index:100;
 }
 
+/* LOGO */
+nav h2{
+text-align:center;
+color:#60a5fa;
+margin-bottom:10px;
+}
+
+/* BOTONES SIDEBAR */
 nav button{
-background:#334155;
+width:100%;
+text-align:left;
+background:var(--card-soft);
+padding:12px;
+border-radius:10px;
 }
 
 nav button:hover{
-background:#475569;
+background:var(--primary);
 }
 
 /* SECCIONES */
 .section{
 display:none;
-padding:20px;
+padding:25px;
+animation:fadeIn 0.5s ease;
 }
 
 .active{
@@ -97,6 +145,8 @@ display:block;
 h2{
 margin-bottom:15px;
 color:#60a5fa;
+border-left:4px solid var(--primary);
+padding-left:10px;
 }
 
 /* TABLAS */
@@ -104,104 +154,102 @@ table{
 width:100%;
 border-collapse:collapse;
 margin-top:10px;
-background:#1e293b;
-border-radius:10px;
+background:var(--card);
+border-radius:12px;
 overflow:hidden;
+box-shadow:0 5px 20px rgba(0,0,0,0.3);
 }
 
 th{
-background:#2563eb;
-padding:12px;
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+padding:14px;
 text-align:left;
 }
 
 td{
-padding:10px;
-border-bottom:1px solid #334155;
+padding:12px;
+border-bottom:1px solid var(--border);
 }
 
 tr:hover{
-background:#334155;
+background:var(--card-soft);
 }
 
-/* LISTA USUARIOS */
+/* LISTAS */
 ul{
 list-style:none;
 padding:0;
 }
 
 li{
-background:#1e293b;
-margin:5px 0;
-padding:10px;
-border-radius:8px;
+background:var(--card);
+margin:8px 0;
+padding:12px;
+border-radius:10px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+transition:0.3s;
 }
 
-/* BOTONES ACCION */
+li:hover{
+background:var(--card-soft);
+}
+
+/* BOTONES EN TABLAS */
 td button{
 margin-right:5px;
 padding:6px 10px;
 font-size:12px;
 }
-/* 📱 RESPONSIVE */
-@media (max-width: 768px){
 
-/* NAV */
+/* ANIMACIONES */
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(10px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* RESPONSIVE */
+@media (max-width:768px){
+
+/* NAV ARRIBA */
 nav{
-flex-direction:column;
-align-items:stretch;
-}
-
-nav button{
+position:relative;
 width:100%;
-margin:3px 0;
-}
-
-/* INPUTS */
-input,select{
-font-size:14px;
-}
-
-/* TABLAS → SCROLL */
-table{
-display:block;
+height:auto;
+flex-direction:row;
 overflow-x:auto;
-white-space:nowrap;
+}
+
+#app{
+margin-left:0;
 }
 
 /* BOTONES */
-button{
-width:100%;
+nav button{
+min-width:120px;
+text-align:center;
 }
 
-/* TITULOS */
-h2{
-font-size:18px;
-}
-
-/* SECCIONES */
-.section{
-padding:10px;
-}
-@media (max-width:768px){
-
-/* TARJETAS EN LUGAR DE TABLAS */
+/* TABLAS A TARJETAS */
 table, thead{
 display:none;
 }
 
 tbody tr{
 display:block;
-background:#1e293b;
+background:var(--card);
 margin-bottom:10px;
-padding:10px;
-border-radius:10px;
+padding:15px;
+border-radius:12px;
 }
 
-/* CELDAS COMO BLOQUES */
 td{
 display:block;
 border:none;
@@ -210,11 +258,91 @@ padding:5px 0;
 
 td:before{
 font-weight:bold;
+color:var(--primary);
 display:block;
-color:#60a5fa;
 }
 
 }
+/* FONDO DINÁMICO BLOQUES */
+.bg-animacion{
+position:absolute;
+width:100%;
+height:100%;
+top:0;
+left:0;
+overflow:hidden;
+z-index:0;
+}
+
+/* BLOQUES */
+.bg-animacion span{
+position:absolute;
+display:block;
+width:40px;
+height:40px;
+background:rgba(59,130,246,0.15);
+animation:animarBloques 20s linear infinite;
+border-radius:6px;
+}
+
+/* DIFERENTES TAMAÑOS Y POSICIONES */
+.bg-animacion span:nth-child(1){
+left:10%; animation-duration:15s; width:30px; height:30px;
+}
+.bg-animacion span:nth-child(2){
+left:20%; animation-duration:18s;
+}
+.bg-animacion span:nth-child(3){
+left:30%; animation-duration:12s; width:50px; height:50px;
+}
+.bg-animacion span:nth-child(4){
+left:40%; animation-duration:20s;
+}
+.bg-animacion span:nth-child(5){
+left:50%; animation-duration:14s;
+}
+.bg-animacion span:nth-child(6){
+left:60%; animation-duration:16s;
+}
+.bg-animacion span:nth-child(7){
+left:70%; animation-duration:22s;
+}
+.bg-animacion span:nth-child(8){
+left:80%; animation-duration:17s;
+}
+.bg-animacion span:nth-child(9){
+left:90%; animation-duration:19s;
+}
+
+/* ANIMACIÓN */
+@keyframes animarBloques{
+0%{
+top:100%;
+transform:rotate(0deg);
+opacity:0;
+}
+20%{
+opacity:1;
+}
+80%{
+opacity:1;
+}
+100%{
+top:-10%;
+transform:rotate(360deg);
+opacity:0;
+}
+}
+
+/* ASEGURAR QUE EL LOGIN ESTÉ ENCIMA */
+#loginBox{
+position:relative;
+overflow:hidden;
+}
+
+.card{
+position:relative;
+z-index:1;
 }
 </style>
 </head>
@@ -690,8 +818,16 @@ doc.save("REPORTE_ALDREX.pdf");
 
 }
 
-</script>
 
+const contenedor = document.querySelector('.bg-animacion');
+
+for(let i = 0; i < 30; i++){
+    let bloque = document.createElement('span');
+    bloque.style.left = Math.random() * 100 + "%";
+    bloque.style.animationDuration = (10 + Math.random()*20) + "s";
+    bloque.style.width = bloque.style.height = (20 + Math.random()*60) + "px";
+    contenedor.appendChild(bloque);
+}
+</script>
 </body>
 </html>
-
