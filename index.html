@@ -5,7 +5,6 @@
 <title>ALDREX TOTAL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="manifest.json"> <meta name="theme-color" content="#1e3a8a">
-<div class="bg-animacion"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -272,6 +271,7 @@ top:0;
 left:0;
 overflow:hidden;
 z-index:0;
+pointer-events:none; /* 🔥 ESTO ARREGLA TODO */
 }
 
 /* BLOQUES */
@@ -348,7 +348,7 @@ z-index:1;
 </head>
 
 <body>
-
+<div class="bg-animacion"></div>
 <div id="loginBox">
 <div class="card">
 <h2>ALDREX</h2>
@@ -459,7 +459,43 @@ z-index:1;
 </div>
 
 <script>
+const user = document.getElementById("user");
+const pass = document.getElementById("pass");
+const loginBox = document.getElementById("loginBox");
+const app = document.getElementById("app");
 
+/* NAV */
+const navDashboard = document.getElementById("navDashboard");
+const navProyectos = document.getElementById("navProyectos");
+const navSolicitudes = document.getElementById("navSolicitudes");
+const navUsuarios = document.getElementById("navUsuarios");
+const navConfig = document.getElementById("navConfig");
+
+/* PROYECTOS */
+const nombreProyecto = document.getElementById("nombreProyecto");
+const clienteProyecto = document.getElementById("clienteProyecto");
+const ubicacionProyecto = document.getElementById("ubicacionProyecto");
+const presupuesto = document.getElementById("presupuesto");
+const avanceProyecto = document.getElementById("avanceProyecto");
+const estadoProyecto = document.getElementById("estadoProyecto");
+const tablaProyectos = document.getElementById("tablaProyectos");
+
+/* SOLICITUDES */
+const tipoSolicitud = document.getElementById("tipoSolicitud");
+const proyectoSolicitud = document.getElementById("proyectoSolicitud");
+const detalleSolicitud = document.getElementById("detalleSolicitud");
+const tablaSolicitudes = document.getElementById("tablaSolicitudes");
+
+/* USUARIOS */
+const nombreCompleto = document.getElementById("nombreCompleto");
+const nuevoUser = document.getElementById("nuevoUser");
+const nuevoPass = document.getElementById("nuevoPass");
+const rolUser = document.getElementById("rolUser");
+const area = document.getElementById("area");
+const listaUsuarios = document.getElementById("listaUsuarios");
+
+/* GRAFICA */
+const grafica = document.getElementById("grafica");
 let usuarioActual=null;
 let chart=null;
 let editIndex=null;
@@ -526,7 +562,20 @@ document.getElementById(id).classList.add("active");
 
 /* PROYECTOS */
 function guardarProyecto(){
-if(usuarioActual.rol==="empleado"){alert("No autorizado");return;}
+
+if(usuarioActual.rol==="empleado"){
+    alert("No autorizado");
+    return;
+}
+
+if(
+!nombreProyecto.value ||
+!clienteProyecto.value ||
+!ubicacionProyecto.value
+){
+    alert("Completa todos los campos");
+    return;
+}
 
 let data={
 nombre:nombreProyecto.value,
@@ -548,7 +597,6 @@ save();
 limpiarProyecto();
 render();
 }
-
 function editarProyecto(i){
 let p=db.proyectos[i];
 nombreProyecto.value=p.nombre;
@@ -828,6 +876,7 @@ for(let i = 0; i < 30; i++){
     bloque.style.width = bloque.style.height = (20 + Math.random()*60) + "px";
     contenedor.appendChild(bloque);
 }
+
 </script>
 </body>
 </html>
