@@ -366,7 +366,8 @@ z-index:1;
 <button id="navProyectos" onclick="show('proyectos')">🏗 Proyectos</button>
 <button id="navSolicitudes" onclick="show('solicitudes')">📩 Solicitudes</button>
 <button id="navUsuarios" onclick="show('usuarios')">👤 Usuarios</button>
-<button id="navConfig" onclick="show('config')">⚙ Config</button>
+<button id="navMateriales" onclick="show('materiales')">📦 Materiales</button>
+<button onclick="show('gastos')">💰 Gastos</button><button id="navConfig" onclick="show('config')">⚙ Config</button>
 <button onclick="logout()">Salir</button>
 </nav>
 
@@ -381,7 +382,12 @@ z-index:1;
 <input id="nombreProyecto" placeholder="Nombre">
 <input id="clienteProyecto" placeholder="Cliente">
 <input id="ubicacionProyecto" placeholder="Ubicación">
-<input id="presupuesto" type="number" placeholder="Presupuesto">
+
+<input id="metros" type="number" placeholder="Metros cuadrados">
+<input id="costoMetro" type="number" placeholder="Costo por m²">
+
+<input id="presupuesto" type="number" placeholder="Presupuesto (automático o manual)">
+
 <input id="avanceProyecto" type="number" placeholder="Avance">
 
 <select id="estadoProyecto">
@@ -450,6 +456,50 @@ z-index:1;
 
 <ul id="listaUsuarios"></ul>
 </div>
+<div id="materiales" class="section">
+<h2>Materiales</h2>
+
+<input id="nombreMaterial" placeholder="Nombre del material">
+<input id="cantidadMaterial" type="number" placeholder="Cantidad">
+<input id="costoMaterial" type="number" placeholder="Costo">
+<input id="proyectoMaterial" placeholder="Proyecto">
+
+<button onclick="guardarMaterial()">Guardar</button>
+
+<table>
+<thead>
+<tr>
+<th>Material</th>
+<th>Cantidad</th>
+<th>Costo</th>
+<th>Proyecto</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody id="tablaMateriales"></tbody>
+</table>
+</div>
+<div id="gastos" class="section">
+<h2>Gastos</h2>
+
+<input id="tipoGasto" placeholder="Tipo (material, transporte, etc)">
+<input id="montoGasto" type="number" placeholder="Monto">
+<input id="proyectoGasto" placeholder="Proyecto">
+
+<button onclick="guardarGasto()">Guardar</button>
+
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Monto</th>
+<th>Proyecto</th>
+<th>Acción</th>
+</tr>
+</thead>
+<tbody id="tablaGastos"></tbody>
+</table>
+</div>
 
 <div id="config" class="section">
 <h2>Configuración</h2>
@@ -457,6 +507,7 @@ z-index:1;
 </div>
 
 </div>
+
 
 <script>
 const user = document.getElementById("user");
@@ -479,7 +530,8 @@ const presupuesto = document.getElementById("presupuesto");
 const avanceProyecto = document.getElementById("avanceProyecto");
 const estadoProyecto = document.getElementById("estadoProyecto");
 const tablaProyectos = document.getElementById("tablaProyectos");
-
+const metros = document.getElementById("metros");
+const costoMetro = document.getElementById("costoMetro");
 /* SOLICITUDES */
 const tipoSolicitud = document.getElementById("tipoSolicitud");
 const proyectoSolicitud = document.getElementById("proyectoSolicitud");
@@ -494,6 +546,19 @@ const rolUser = document.getElementById("rolUser");
 const area = document.getElementById("area");
 const listaUsuarios = document.getElementById("listaUsuarios");
 
+/* MATERIALES */
+const nombreMaterial = document.getElementById("nombreMaterial");
+const cantidadMaterial = document.getElementById("cantidadMaterial");
+const costoMaterial = document.getElementById("costoMaterial");
+const proyectoMaterial = document.getElementById("proyectoMaterial");
+const tablaMateriales = document.getElementById("tablaMateriales");
+
+/* GASTOS */
+const tipoGasto = document.getElementById("tipoGasto");
+const montoGasto = document.getElementById("montoGasto");
+const proyectoGasto = document.getElementById("proyectoGasto");
+const tablaGastos = document.getElementById("tablaGastos");
+
 /* GRAFICA */
 const grafica = document.getElementById("grafica");
 let usuarioActual=null;
@@ -504,7 +569,9 @@ let editUserIndex=null;
 let db=JSON.parse(localStorage.getItem("aldrexDB"))||{
 usuarios:[{nombre:"Admin",user:"admin",pass:btoa("admin123"),rol:"admin",area:"General"}],
 proyectos:[],
-solicitudes:[]
+solicitudes:[],
+materiales:[],
+gastos:[]
 };
 
 function save(){localStorage.setItem("aldrexDB",JSON.stringify(db));}
@@ -577,11 +644,13 @@ if(
     return;
 }
 
+let presupuestoCalculado = Number(metros.value) * Number(costoMetro.value);
+
 let data={
 nombre:nombreProyecto.value,
 cliente:clienteProyecto.value,
 ubicacion:ubicacionProyecto.value,
-presupuesto:Number(presupuesto.value||0),
+presupuesto: presupuestoCalculado || Number(presupuesto.value||0),
 estado:estadoProyecto.value,
 avance:Number(avanceProyecto.value||0)
 };
@@ -605,6 +674,8 @@ ubicacionProyecto.value=p.ubicacion;
 presupuesto.value=p.presupuesto;
 avanceProyecto.value=p.avance;
 estadoProyecto.value=p.estado;
+metros.value="";
+costoMetro.value="";
 editIndex=i;
 }
 
@@ -705,7 +776,59 @@ nuevoPass.value="";
 area.value="";
 editUserIndex=null;
 }
+function guardarMaterial(){
 
+if(!nombreMaterial.value || !cantidadMaterial.value){
+    alert("Completa datos");
+    return;
+}
+
+db.materiales.push({
+    nombre:nombreMaterial.value,
+    cantidad:Number(cantidadMaterial.value),
+    costo:Number(costoMaterial.value||0),
+    proyecto:proyectoMaterial.value
+});
+
+save();
+limpiarMaterial();
+render();
+}
+
+function eliminarMaterial(i){
+db.materiales.splice(i,1);
+save();
+render();
+}
+
+function limpiarMaterial(){
+nombreMaterial.value="";
+cantidadMaterial.value="";
+costoMaterial.value="";
+proyectoMaterial.value="";
+}
+function guardarGasto(){
+
+if(!tipoGasto.value || !montoGasto.value){
+    alert("Completa datos");
+    return;
+}
+
+db.gastos.push({
+    tipo:tipoGasto.value,
+    monto:Number(montoGasto.value),
+    proyecto:proyectoGasto.value
+});
+
+save();
+render();
+}
+
+function eliminarGasto(i){
+db.gastos.splice(i,1);
+save();
+render();
+}
 /* RENDER */
 function render(){
 
@@ -742,6 +865,29 @@ ${u.nombre} - ${u.rol}
 <button onclick="eliminarUsuario(${i})">Eliminar</button>
 </li>`).join("");
 
+tablaMateriales.innerHTML = db.materiales.map((m,i)=>`
+<tr>
+<td>${m.nombre}</td>
+<td>${m.cantidad}</td>
+<td>$${m.costo}</td>
+<td>${m.proyecto}</td>
+<td>
+<button onclick="eliminarMaterial(${i})">Eliminar</button>
+</td>
+</tr>
+`).join("");
+
+tablaGastos.innerHTML = db.gastos.map((g,i)=>`
+<tr>
+<td>${g.tipo}</td>
+<td>$${g.monto}</td>
+<td>${g.proyecto}</td>
+<td>
+<button onclick="eliminarGasto(${i})">Eliminar</button>
+</td>
+</tr>
+`).join("");
+
 if(chart) chart.destroy();
 
 if(db.proyectos.length>0){
@@ -758,6 +904,7 @@ data:db.proyectos.map(p=>p.avance)
 }
 
 }
+
 
 /* PDF */
 
